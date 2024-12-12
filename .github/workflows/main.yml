@@ -149,7 +149,7 @@ jobs:
 # # name: Build and Push Docker Image to ACR
 
 # # on:
-# #   # Trigger the workflow on a push to the `main` branch
+# #   # Trigger the workflow on a push to the `main` branch 
 # #   push:
 # #     branches:
 # #       - main

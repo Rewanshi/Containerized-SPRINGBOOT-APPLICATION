@@ -62,7 +62,7 @@ jobs:
             --name ${{ secrets.CONTAINER_APP_NAME }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             # --image java-app:latest
-            --image myjavaappregistrysamp.azurecr.io/java-app:latest
+            --image myjavaappregistrysamp.azurecr.io/java-app:latest \
             --environment mynew-appenv 
 
 

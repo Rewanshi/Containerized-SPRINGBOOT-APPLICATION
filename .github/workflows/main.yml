@@ -56,13 +56,13 @@ jobs:
       - name: Deploy to Azure Container Apps
         run: |
           az acr login --name myjavaappregistrysamp
-          # az containerapp env create --name mynew-appenv-aca --resource-group  ${{ secrets.RESOURCE_GROUP }} --location eastus
+          az containerapp env create --name final-new-env --resource-group  ${{ secrets.RESOURCE_GROUP }} --location eastus
           az containerapp list --resource-group ${{ secrets.RESOURCE_GROUP }} --output table
-          az containerapp update \
+          az containerapp create \
             --name ${{ secrets.CONTAINER_APP_NAME }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --image myjavaappregistrysamp.azurecr.io/java-app:latest \
-            --environment mynew-appenv
+            --environment final-new-env
 
 
 

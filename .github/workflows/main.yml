@@ -62,6 +62,7 @@ jobs:
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             # --image java-app:latest
             --image myjavaappregistrysamp.azurecr.io/java-app:latest
+            --enviornment prod-aca-env
 
 
 

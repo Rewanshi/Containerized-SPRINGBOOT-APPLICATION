@@ -48,9 +48,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Log in to Azure Container Registry
-        run: |
-          az acr login --name myjavaappregistrysamp
+      # - name: Log in to Azure Container Registry
+      #   run: |
+      #     az acr login --name myjavaappregistrysamp
 
       # Deploy to Azure Container Apps
       - name: Deploy to Azure Container Apps
@@ -60,7 +60,8 @@ jobs:
           az containerapp update \
             --name ${{ secrets.CONTAINER_APP_NAME }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --image myjavaappregistrysamp.azurecr.io/java-app:latest
+            --image java-app:latest
+            # --image myjavaappregistrysamp.azurecr.io/java-app:latest
 
 
 

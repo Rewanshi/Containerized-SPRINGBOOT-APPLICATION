@@ -8,7 +8,7 @@ public class HelloController {
 
     @RequestMapping("/hello")
     public String hello(){
-        return "whatever way it goes, it's going to end with me WINNING";
+        return "whatever way it goes, it's going to end with me WINNING, CICD DONE SUCCESSFULLY";
     }
     
 }

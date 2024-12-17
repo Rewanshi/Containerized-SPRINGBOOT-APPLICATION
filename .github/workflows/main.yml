@@ -51,14 +51,14 @@ jobs:
       # Log in to Azure Container Registry
       - name: Log in to Azure Container Registry
         run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
+          az acr login --name ${{ secrets.ACR_USERNAME }}
 
       # Update the Container App
       - name: Update Azure Container App
         run: |
-          CONTAINERAPP_NAME="java-app"
+          CONTAINERAPP_NAME="java-app-cont"
           RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP }}"
-          REGISTRY_NAME="${{ secrets.ACR_NAME }}"
+          REGISTRY_NAME="${{ secrets.ACR_USERNAME }}"
           IMAGE_NAME="java-app-new"
 
           az containerapp update \
@@ -73,6 +73,6 @@ jobs:
         run: |
           echo "Container App FQDN:"
           az containerapp show \
-            --name java-app \
+            --name java-app-cont \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --query properties.configuration.ingress.fqdn -o tsv

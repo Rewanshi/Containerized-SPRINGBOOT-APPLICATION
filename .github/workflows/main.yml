@@ -21,7 +21,7 @@ jobs:
       # Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -t java-app ./Springboot-application-docker
+          docker build -t java-app-new ./Springboot-application-docker
 
       # Log in to Azure Container Registry (ACR)
       - name: Log in to Azure Container Registry
@@ -34,8 +34,8 @@ jobs:
       # Push the Docker image to ACR
       - name: Push Docker Image to ACR
         run: |
-          docker tag java-app ${{ secrets.ACR_LOGIN_SERVER }}/java-app:latest
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/java-app:latest
+          docker tag java-app ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,82 +48,31 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Log in to Azure Container Registry
-      #   run: |
-      #     az acr login --name myjavaappregistrysamp
-
-      # Deploy to Azure Container Apps
-      - name: Deploy to Azure Container Apps
+      # Log in to Azure Container Registry
+      - name: Log in to Azure Container Registry
         run: |
-          az acr login --name myjavaappregistrysamp
-          az containerapp env create --name final-new-env --resource-group  ${{ secrets.RESOURCE_GROUP }} --location eastus
-          az containerapp list --resource-group ${{ secrets.RESOURCE_GROUP }} --output table
-          az containerapp create \
-            --name ${{ secrets.CONTAINER_APP_NAME }} \
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      # Update the Container App
+      - name: Update Azure Container App
+        run: |
+          CONTAINERAPP_NAME="java-app"
+          RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP }}"
+          REGISTRY_NAME="${{ secrets.ACR_NAME }}"
+          IMAGE_NAME="java-app-new"
+
+          az containerapp update \
+            --name $CONTAINERAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --image "${REGISTRY_NAME}.azurecr.io/${IMAGE_NAME}:latest" \
+            --ingress external \
+            --target-port 8080
+
+      # Check Container App Status
+      - name: Check Container App FQDN
+        run: |
+          echo "Container App FQDN:"
+          az containerapp show \
+            --name java-app \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            --image myjavaappregistrysamp.azurecr.io/java-app:latest \
-            --environment final-new-env
-
-
-
-            
-# name: Build, Push, and Deploy to Azure Container Apps
-
-# on:
-#   push:
-#     branches: 
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-#   workflow_dispatch:          
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       # Checkout the code from the repository
-#       - name: Checkout Code
-#         uses: actions/checkout@v3
-
-      # # Build the Docker image
-      # - name: Build Docker Image
-      #   run: |
-      #     docker build -t java-app ./Springboot-application-docker
-
-      # # Log in to Azure Container Registry (ACR)
-      # - name: Log in to Azure Container Registry
-      #   uses: azure/docker-login@v1
-      #   with:
-      #     login-server: ${{ secrets.ACR_LOGIN_SERVER }}
-      #     username: ${{ secrets.ACR_USERNAME }}
-      #     password: ${{ secrets.ACR_PASSWORD }}
-
-      # # Push the Docker image to ACR
-      # - name: Push Docker Image to ACR
-      #   run: |
-  #         docker tag java-app ${{ secrets.ACR_LOGIN_SERVER }}/java-app:latest
-  #         docker push ${{ secrets.ACR_LOGIN_SERVER }}/java-app:latest
-
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-
-  #   steps:
-  #     # Log in to Azure using service principal
-  #     - name: Log in to Azure
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-  #     # Update Azure Container App with the new image
-  #     - name: Deploy to Azure Container Apps
-  #       run: |
-  #         az containerapp update \
-            # --name ${{ secrets.CONTAINER_APP_NAME }} \
-            # --resource-group ${{ secrets.RESOURCE_GROUP }} \
-            # --image ${{ secrets.ACR_LOGIN_SERVER }}/java-app:latest \
-            # --set imageRegistry=server=${{ secrets.ACR_LOGIN_SERVER }},username=${{ secrets.ACR_USERNAME }},password=${{ secrets.ACR_PASSWORD }}
-
-
+            --query properties.configuration.ingress.fqdn -o tsv

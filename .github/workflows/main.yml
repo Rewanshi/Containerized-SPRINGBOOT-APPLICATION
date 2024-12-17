@@ -64,9 +64,9 @@ jobs:
           az containerapp update \
             --name $CONTAINERAPP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --image "${REGISTRY_NAME}.azurecr.io/${IMAGE_NAME}:latest" \
-            --ingress external \
-            --target-port 8080
+            --image "${REGISTRY_NAME}.azurecr.io/${IMAGE_NAME}:latest" 
+            # --ingress external \
+            # --target-port 8080
 
       # Check Container App Status
       - name: Check Container App FQDN

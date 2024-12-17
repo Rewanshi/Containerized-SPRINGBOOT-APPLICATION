@@ -34,7 +34,7 @@ jobs:
       # Push the Docker image to ACR
       - name: Push Docker Image to ACR
         run: |
-          docker tag java-app ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
+          docker tag java-app-new ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
 
   deploy:

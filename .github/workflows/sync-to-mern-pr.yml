@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEST_REPO: your-username/Containerized-MERN-STACK-TODOAPP  # Replace with your GitHub username
+      DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP  # Replace with your GitHub username
       DEST_BRANCH: destination
       TEMP_BRANCH: sync-from-source
 

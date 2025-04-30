@@ -30,14 +30,15 @@ jobs:
           git checkout ${{ env.DEST_BRANCH }}
           git checkout -b ${{ env.TEMP_BRANCH }}
 
-                - name: Sync files to MERN repo
+                         - name: Sync files to MERN repo
             run: |
               cd dest-repo
               git checkout ${{ env.DEST_BRANCH }}
               git checkout -b ${{ env.TEMP_BRANCH }}
           
-              # Pull latest changes from remote branch to avoid non-fast-forward error
-              git pull origin ${{ env.TEMP_BRANCH }} --rebase
+              # Ensure we pull the latest changes from the remote branch (using --rebase)
+              git fetch origin ${{ env.TEMP_BRANCH }} # Make sure we have the latest updates
+              git rebase origin/${{ env.TEMP_BRANCH }}
           
               # Sync files from source repo to destination repo
               rsync -av --exclude='.git' --exclude='.github/workflows/**' ../. .
@@ -47,6 +48,7 @@ jobs:
           
               # Push changes to remote temp branch
               git push origin ${{ env.TEMP_BRANCH }}
+
 
       - name: Create Pull Request from cloned MERN repo
         working-directory: dest-repo

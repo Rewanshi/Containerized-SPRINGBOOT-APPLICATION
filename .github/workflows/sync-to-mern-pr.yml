@@ -1,67 +1,50 @@
-name: Sync Source to MERN Repo and Create PR
+name: Sync to MERN Repo
 
 on:
   push:
     branches:
-      - source  # Only trigger when pushing to 'source' branch in SPRINGBOOT repo
+      - source
 
 jobs:
-  sync-and-pr:
+  sync:
     runs-on: ubuntu-latest
 
     env:
-      DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP  # Replace with your GitHub username
+      DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
+      SOURCE_BRANCH: source
       DEST_BRANCH: destination
-      TEMP_BRANCH: sync-from-source
 
     steps:
-      - name: Checkout SPRINGBOOT repo (source)
-        uses: actions/checkout@v4
+      - name: Checkout Source Repo (SPRINGBOOT)
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.SOURCE_BRANCH }}
 
       - name: Set up Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Clone MERN repo (destination)
+      - name: Clone Destination Repo (MERN)
         run: |
           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
           cd dest-repo
           git checkout ${{ env.DEST_BRANCH }}
-          git checkout -b ${{ env.TEMP_BRANCH }}
+          rsync -av --exclude='.git' --exclude='.github/workflows/**' ../ ./  # Copy from source repo to dest
+          git add .
+          git commit -m "Sync changes from source branch in SPRINGBOOT repo" || echo "No changes to commit"
+          git push origin ${{ env.DEST_BRANCH }}
 
-                                                                                                  - name: Sync files to MERN repo
-                                                                            run: |
-                                                                              cd dest-repo
-                                                                              git checkout ${{ env.DEST_BRANCH }}
-                                                                          
-                                                                              # Make sure we are on the correct branch, no rebase needed
-                                                                              git pull origin ${{ env.DEST_BRANCH }} # Pull latest changes from remote
-                                                                          
-                                                                              # Create a new branch based on the destination branch
-                                                                              git checkout -b ${{ env.TEMP_BRANCH }}
-                                                                          
-                                                                              # Sync files from the source repo to the destination repo
-                                                                              rsync -av --exclude='.git' --exclude='.github/workflows/**' ../. .
-                                                                          
-                                                                              git add .
-                                                                              git commit -m "Sync changes from Containerized-SPRINGBOOT-APPLICATION (source branch)" || echo "No changes to commit"
-                                                                          
-                                                                              # Push changes to the remote temp branch
-                                                                              git push origin ${{ env.TEMP_BRANCH }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: dest-repo
+          title: "Sync changes from SPRINGBOOT:source to MERN:destination"
+          body: "Automated sync triggered by changes in the source repo."
+          base: ${{ env.DEST_BRANCH }}
+          branch: ${{ env.DEST_BRANCH }}
 
-
-
-      - name: Create Pull Request from cloned MERN repo
-        working-directory: dest-repo
-        run: |
-            gh pr create \
-            --base ${{ env.DEST_BRANCH }} \
-            --head ${{ env.TEMP_BRANCH }} \
-            --title "Sync changes from SPRINGBOOT (source) to MERN (destination)" \
-            --body "This PR includes updates from the source branch of Containerized-SPRINGBOOT-APPLICATION."
-            env:
-             GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
             
 

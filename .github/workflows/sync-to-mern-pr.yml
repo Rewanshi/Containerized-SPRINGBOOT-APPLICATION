@@ -30,24 +30,26 @@ jobs:
           git checkout ${{ env.DEST_BRANCH }}
           git checkout -b ${{ env.TEMP_BRANCH }}
 
-                         - name: Sync files to MERN repo
-            run: |
-              cd dest-repo
-              git checkout ${{ env.DEST_BRANCH }}
-              git checkout -b ${{ env.TEMP_BRANCH }}
-          
-              # Ensure we pull the latest changes from the remote branch (using --rebase)
-              git fetch origin ${{ env.TEMP_BRANCH }} # Make sure we have the latest updates
-              git rebase origin/${{ env.TEMP_BRANCH }}
-          
-              # Sync files from source repo to destination repo
-              rsync -av --exclude='.git' --exclude='.github/workflows/**' ../. .
-          
-              git add .
-              git commit -m "Sync changes from Containerized-SPRINGBOOT-APPLICATION (source branch)" || echo "No changes to commit"
-          
-              # Push changes to remote temp branch
-              git push origin ${{ env.TEMP_BRANCH }}
+                                                                                                  - name: Sync files to MERN repo
+                                                                            run: |
+                                                                              cd dest-repo
+                                                                              git checkout ${{ env.DEST_BRANCH }}
+                                                                          
+                                                                              # Make sure we are on the correct branch, no rebase needed
+                                                                              git pull origin ${{ env.DEST_BRANCH }} # Pull latest changes from remote
+                                                                          
+                                                                              # Create a new branch based on the destination branch
+                                                                              git checkout -b ${{ env.TEMP_BRANCH }}
+                                                                          
+                                                                              # Sync files from the source repo to the destination repo
+                                                                              rsync -av --exclude='.git' --exclude='.github/workflows/**' ../. .
+                                                                          
+                                                                              git add .
+                                                                              git commit -m "Sync changes from Containerized-SPRINGBOOT-APPLICATION (source branch)" || echo "No changes to commit"
+                                                                          
+                                                                              # Push changes to the remote temp branch
+                                                                              git push origin ${{ env.TEMP_BRANCH }}
+
 
 
       - name: Create Pull Request from cloned MERN repo

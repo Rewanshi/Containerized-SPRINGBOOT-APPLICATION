@@ -1,0 +1,136 @@
+name: Sync Source to MERN Repo and Create PR
+
+on:
+  push:
+    branches:
+      - source  # Only trigger when pushing to 'source' branch in SPRINGBOOT repo
+
+jobs:
+  sync-and-pr:
+    runs-on: ubuntu-latest
+
+    env:
+      DEST_REPO: your-username/Containerized-MERN-STACK-TODOAPP  # Replace with your GitHub username
+      DEST_BRANCH: destination
+      TEMP_BRANCH: sync-from-source
+
+    steps:
+      - name: Checkout SPRINGBOOT repo (source)
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Clone MERN repo (destination)
+        run: |
+          git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
+          cd dest-repo
+          git checkout ${{ env.DEST_BRANCH }}
+          git checkout -b ${{ env.TEMP_BRANCH }}
+
+      - name: Sync files to MERN repo
+        run: |
+          rsync -av --exclude='.git' ./ dest-repo/
+          cd dest-repo
+          git add .
+          git commit -m "Sync changes from Containerized-SPRINGBOOT-APPLICATION (source branch)" || echo "No changes to commit"
+          git push origin ${{ env.TEMP_BRANCH }}
+
+      - name: Create PR in MERN repo
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: ${{ env.DEST_REPO }}
+          title: "Sync changes from SPRINGBOOT (source) to MERN (destination)"
+          body: |
+            This PR includes updates from the `source` branch in the SPRINGBOOT repo.
+            It merges into the `destination` branch of the MERN repo.
+            Created automatically by GitHub Actions.
+          base: ${{ env.DEST_BRANCH }}
+          branch: ${{ env.TEMP_BRANCH }}
+          commit-message: "Automated sync from SPRINGBOOT:source"
+
+
+
+
+          
+# name: Build, Push, and Deploy to Azure Container Apps
+
+# on:
+#   push:
+#     branches: 
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+#   workflow_dispatch:
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Checkout the code from the repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       # Build the Docker image
+#       - name: Build Docker Image
+#         run: |
+#           docker build -t java-app-new ./Springboot-application-docker
+
+#       # Log in to Azure Container Registry (ACR)
+#       - name: Log in to Azure Container Registry
+#         uses: azure/docker-login@v1
+#         with:
+#           login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+#           username: ${{ secrets.ACR_USERNAME }}
+#           password: ${{ secrets.ACR_PASSWORD }}
+
+#       # Push the Docker image to ACR
+#       - name: Push Docker Image to ACR
+#         run: |
+#           docker tag java-app-new ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
+#           docker push ${{ secrets.ACR_LOGIN_SERVER }}/java-app-new:latest
+
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: build
+
+#     steps:
+#       # Log in to Azure using service principal
+#       - name: Log in to Azure
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       # Log in to Azure Container Registry
+#       - name: Log in to Azure Container Registry
+#         run: |
+#           az acr login --name ${{ secrets.ACR_USERNAME }}
+
+#       # Update the Container App
+#       - name: Update Azure Container App
+#         run: |
+#           CONTAINERAPP_NAME="java-app-cont"
+#           RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP }}"
+#           REGISTRY_NAME="${{ secrets.ACR_USERNAME }}"
+#           IMAGE_NAME="java-app-new"
+
+#           az containerapp update \
+#             --name $CONTAINERAPP_NAME \
+#             --resource-group $RESOURCE_GROUP \
+#             --image "${REGISTRY_NAME}.azurecr.io/${IMAGE_NAME}:latest" 
+#             # --ingress external \
+#             # --target-port 8080
+
+#       # Check Container App Status
+#       - name: Check Container App FQDN
+#         run: |
+#           echo "Container App FQDN:"
+#           az containerapp show \
+#             --name java-app-cont \
+#             --resource-group ${{ secrets.RESOURCE_GROUP }} \
+#             --query properties.configuration.ingress.fqdn -o tsv

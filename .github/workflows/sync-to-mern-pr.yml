@@ -38,19 +38,18 @@ jobs:
           git commit -m "Sync changes from Containerized-SPRINGBOOT-APPLICATION (source branch)" || echo "No changes to commit"
           git push origin ${{ env.TEMP_BRANCH }}
 
-      - name: Create PR in MERN repo
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          repository: ${{ env.DEST_REPO }}
-          title: "Sync changes from SPRINGBOOT (source) to MERN (destination)"
-          body: |
-            This PR includes updates from the `source` branch in the SPRINGBOOT repo.
-            It merges into the `destination` branch of the MERN repo.
-            Created automatically by GitHub Actions.
-          base: ${{ env.DEST_BRANCH }}
-          branch: ${{ env.TEMP_BRANCH }}
-          commit-message: "Automated sync from SPRINGBOOT:source"
+      - name: Create Pull Request from cloned MERN repo
+        working-directory: dest-repo
+        run: |
+            gh pr create \
+            --base ${{ env.DEST_BRANCH }} \
+            --head ${{ env.TEMP_BRANCH }} \
+            --title "Sync changes from SPRINGBOOT (source) to MERN (destination)" \
+            --body "This PR includes updates from the source branch of Containerized-SPRINGBOOT-APPLICATION."
+            env:
+             GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+            
 
 
 

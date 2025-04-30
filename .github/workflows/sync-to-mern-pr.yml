@@ -35,7 +35,8 @@ jobs:
           # Create or reset the sync branch
           git checkout -B ${{ env.SYNC_BRANCH }}
 
-          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ 
+          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
+
 
           git add .
           git commit -m "Sync changes from SPRINGBOOT:source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"

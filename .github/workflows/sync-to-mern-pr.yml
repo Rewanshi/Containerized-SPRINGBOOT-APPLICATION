@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      REPO_B: Rewanshi/Containerized-MERN-STACK-TODOAPP
+      REPO_B: <your-username-or-org>/Containerized-MERN-STACK-TODOAPP
       SOURCE_BRANCH: new_source
       DEST_BRANCH: new_destination
 
@@ -20,31 +20,32 @@ jobs:
       with:
         ref: ${{ env.SOURCE_BRANCH }}
 
-    - name: Clone Repo B
+    - name: Clone Repo B outside the workspace
       run: |
-        git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${REPO_B}.git
-        cd Containerized-MERN-STACK-TODOAPP
-        git checkout -B $DEST_BRANCH origin/$DEST_BRANCH || git checkout -b $DEST_BRANCH
+        git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git /tmp/repo-b
+        cd /tmp/repo-b
+        git checkout -B $DEST_BRANCH || git checkout -b $DEST_BRANCH
 
-    - name: Sync changes to Repo B
+    - name: Sync files from Repo A to Repo B
       run: |
-        rsync -av --exclude='.git' ../Containerized-SPRINGBOOT-APPLICATION/ .
+        rsync -av --exclude='.git' $GITHUB_WORKSPACE/ /tmp/repo-b/
+        cd /tmp/repo-b
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Sync changes from Repo A ($SOURCE_BRANCH)" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git $DEST_BRANCH
 
-
     - name: Create Pull Request in Repo B
       uses: peter-evans/create-pull-request@v6
       with:
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        token: ${{ secrets.GH_PAT }}
         repository: ${{ env.REPO_B }}
         title: "Automated PR: Sync from Repo A ($SOURCE_BRANCH)"
         body: "This PR syncs changes from Repo A branch `$SOURCE_BRANCH` to Repo B branch `$DEST_BRANCH`."
         base: ${{ env.DEST_BRANCH }}
         head: ${{ env.DEST_BRANCH }}
+
 
         
 # name: Build, Push, and Deploy to Azure Container Apps

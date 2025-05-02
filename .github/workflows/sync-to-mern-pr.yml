@@ -1,4 +1,4 @@
-name: Sync to MERN Repo and Raise PR
+name: Sync to MERN Repository and Raise PR
 
 on:
   push:

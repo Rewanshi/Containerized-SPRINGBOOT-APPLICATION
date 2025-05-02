@@ -1,4 +1,4 @@
-name: Sync to MERN Repository and Raise PR
+name: Sync to MERN Repository and Create PR
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - source
 
 jobs:
-  sync-and-pr:
+  sync:
     runs-on: ubuntu-latest
 
     env:
@@ -31,13 +31,16 @@ jobs:
           cd dest-repo
 
           git checkout ${{ env.DEST_BRANCH }}
+
+          # Create or reset the sync branch
           git checkout -B ${{ env.SYNC_BRANCH }}
 
-          # Sync changes from Repo A
           rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
 
+
           git add .
-          git commit -m "Sync from SPRINGBOOT source → MERN destination" || echo "No changes to commit"
+          git commit -m "Sync changes from SPRINGBOOT:source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
+
           git push -f origin ${{ env.SYNC_BRANCH }}
 
       - name: Create Pull Request
@@ -46,66 +49,9 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: dest-repo
           title: "Sync: SPRINGBOOT source → MERN destination"
-          body: |
-            This is an automated PR to sync updates from the `source` branch of the SPRINGBOOT repo into the `destination` branch of the MERN repo.
-            
-            Please review and merge.
+          body: "Automated PR to sync source changes to MERN destination."
           base: ${{ env.DEST_BRANCH }}
           branch: ${{ env.SYNC_BRANCH }}
-# name: Sync to MERN Repository and Create PR
-
-# on:
-#   push:
-#     branches:
-#       - source
-
-# jobs:
-#   sync:
-#     runs-on: ubuntu-latest
-
-#     env:
-#       DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
-#       DEST_BRANCH: destination
-#       SYNC_BRANCH: sync-from-source
-
-#     steps:
-#       - name: Checkout Source Repo
-#         uses: actions/checkout@v3
-#         with:
-#           ref: source
-
-#       - name: Set up Git
-#         run: |
-#           git config --global user.name "github-actions[bot]"
-#           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-#       - name: Clone Destination Repo
-#         run: |
-#           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
-#           cd dest-repo
-
-#           git checkout ${{ env.DEST_BRANCH }}
-
-#           # Create or reset the sync branch
-#           git checkout -B ${{ env.SYNC_BRANCH }}
-
-#           rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
-
-
-#           git add .
-#           git commit -m "Sync changes from SPRINGBOOT:source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
-
-#           git push -f origin ${{ env.SYNC_BRANCH }}
-
-#       - name: Create Pull Request
-#         uses: peter-evans/create-pull-request@v5
-#         with:
-#           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-#           path: dest-repo
-#           title: "Sync: SPRINGBOOT source → MERN destination"
-#           body: "Automated PR to sync source changes to MERN destination."
-#           base: ${{ env.DEST_BRANCH }}
-#           branch: ${{ env.SYNC_BRANCH }}
 
 
 

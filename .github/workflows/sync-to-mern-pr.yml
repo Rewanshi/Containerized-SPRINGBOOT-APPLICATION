@@ -1,4 +1,4 @@
-name: Sync Repo A to Repo B and Raise PRs
+name: Sync Repo A to Repo B and Raise PR
 
 on:
   push:

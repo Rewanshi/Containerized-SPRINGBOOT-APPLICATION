@@ -1,4 +1,4 @@
-name: Sync to MERN Repository and Create PR
+name: Sync to MERN Repository and Create Pull requests
 
 on:
   push:

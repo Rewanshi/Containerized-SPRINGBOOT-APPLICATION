@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      REPO_B: <your-username-or-org>/Containerized-MERN-STACK-TODOAPP
+      REPO_B: Rewanshi/Containerized-MERN-STACK-TODOAPP
       SOURCE_BRANCH: new_source
       DEST_BRANCH: new_destination
 

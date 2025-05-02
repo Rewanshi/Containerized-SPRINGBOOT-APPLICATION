@@ -26,6 +26,8 @@ jobs:
         cd /tmp/repo-b
         git checkout -B $DEST_BRANCH || git checkout -b $DEST_BRANCH
 
+        
+
     - name: Sync files from Repo A to Repo B
       run: |
         rsync -av --exclude='.git' $GITHUB_WORKSPACE/ /tmp/repo-b/
@@ -34,8 +36,18 @@ jobs:
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Sync changes from Repo A ($SOURCE_BRANCH)" || echo "No changes to commit"
+        git pull --rebase origin $DEST_BRANCH
         git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git $DEST_BRANCH
-        # git push --set-upstream https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git $DEST_BRANCH
+# - name: Sync files from Repo A to Repo B
+    #   run: |
+    #     rsync -av --exclude='.git' $GITHUB_WORKSPACE/ /tmp/repo-b/
+    #     cd /tmp/repo-b
+    #     git config user.name "github-actions[bot]"
+    #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+    #     git add .
+    #     git commit -m "Sync changes from Repo A ($SOURCE_BRANCH)" || echo "No changes to commit"
+    #     git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git $DEST_BRANCH
+    #     # git push --set-upstream https://x-access-token:${{ secrets.GH_PAT }}@github.com/${REPO_B}.git $DEST_BRANCH
 
 
     - name: Create Pull Request in Repo B

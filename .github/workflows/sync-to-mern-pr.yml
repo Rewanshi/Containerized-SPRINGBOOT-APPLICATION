@@ -1,4 +1,4 @@
-name: Sync to MERN Repo and Create PR Automatically
+name: Sync to MERN Repo and Create PR
 
 on:
   push:
@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP  # Change with your Repo B's name
-      DEST_BRANCH: new_destination   # Destination branch in Repo B
-      SYNC_BRANCH: sync-from-new-source  # Temporary sync branch in Repo B
+      DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
+      DEST_BRANCH: new_destination
+      SYNC_BRANCH: sync-from-new-source
 
     steps:
-      - name: Checkout Source Repo (Repo A)
+      - name: Checkout Source Repo
         uses: actions/checkout@v3
         with:
           ref: new_source
@@ -25,7 +25,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Clone Destination Repo (Repo B)
+      - name: Clone Destination Repo
         run: |
           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
           cd dest-repo
@@ -36,76 +36,22 @@ jobs:
           git checkout -B ${{ env.SYNC_BRANCH }}
 
           # Sync files (ignore .git and GitHub workflow files)
-          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
+          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true 
 
           git add .
           git commit -m "Sync changes from new_source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
 
           git push -f origin ${{ env.SYNC_BRANCH }}
 
-      - name: Create Pull Request Automatically
+      - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          title: "Sync changes from new_source → new_destination"
-          body: "Automated PR to sync new_source branch to new_destination."
-          base: ${{ env.DEST_BRANCH }}  # Base branch for PR (destination branch in Repo B)
-          branch: ${{ env.SYNC_BRANCH }}  # The branch from which to create the PR (sync branch)
-          
-# name: Sync to MERN Repo and Create PR
-
-# on:
-#   push:
-#     branches:
-#       - new_source
-
-# jobs:
-#   sync:
-#     runs-on: ubuntu-latest
-
-#     env:
-#       DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
-#       DEST_BRANCH: new_destination
-#       SYNC_BRANCH: sync-from-new-source
-
-#     steps:
-#       - name: Checkout Source Repo
-#         uses: actions/checkout@v3
-#         with:
-#           ref: new_source
-
-#       - name: Set up Git
-#         run: |
-#           git config --global user.name "github-actions[bot]"
-#           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-#       - name: Clone Destination Repo
-#         run: |
-#           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
-#           cd dest-repo
-
-#           git checkout ${{ env.DEST_BRANCH }}
-
-#           # Create or reset the sync branch
-#           git checkout -B ${{ env.SYNC_BRANCH }}
-
-#           # Sync files (ignore .git and GitHub workflow files)
-#           rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true 
-
-#           git add .
-#           git commit -m "Sync changes from new_source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
-
-#           git push -f origin ${{ env.SYNC_BRANCH }}
-
-#       - name: Create Pull Request
-#         uses: peter-evans/create-pull-request@v5
-#         with:
-#           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-#           path: dest-repo
-#           title: "Sync: new_source → new_destination"
-#           body: "Automated PR to sync new_source changes to new_destination."
-#           base: ${{ env.DEST_BRANCH }}
-#           branch: ${{ env.SYNC_BRANCH }}
+          path: dest-repo
+          title: "Sync: new_source → new_destination"
+          body: "Automated PR to sync new_source changes to new_destination."
+          base: ${{ env.DEST_BRANCH }}
+          branch: ${{ env.SYNC_BRANCH }}
 
 
         

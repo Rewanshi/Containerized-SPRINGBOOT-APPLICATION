@@ -12,13 +12,13 @@ jobs:
     env:
       DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
       DEST_BRANCH: new_destination
-      SYNC_BRANCH: sync-from-new-source
+      SYNC_BRANCH: new_source
 
     steps:
       - name: Checkout Source Repo
         uses: actions/checkout@v3
         with:
-          ref: new_source
+          ref: ${{ env.SYNC_BRANCH }}
 
       - name: Set up Git
         run: |
@@ -29,30 +29,33 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
           cd dest-repo
-
           git checkout ${{ env.DEST_BRANCH }}
 
-          # Create or reset the sync branch
-          git checkout -B ${{ env.SYNC_BRANCH }}
+          # Pull latest to avoid non-fast-forward errors
+          git pull origin ${{ env.DEST_BRANCH }}
 
-          # Sync files (ignore .git and GitHub workflow files)
-          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true 
+          # Sync files (ignore .git and workflows)
+          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
 
           git add .
-          git commit -m "Sync changes from new_source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
+          git commit -m "Sync changes from new_source → new_destination" || echo "No changes to commit"
 
-          git push -f origin ${{ env.SYNC_BRANCH }}
+          git push -u origin ${{ env.SYNC_BRANCH }}
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: yes, approved
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          path: dest-repo
-          title: "Sync: new_source → new_destination"
-          body: "Automated PR to sync new_source changes to new_destination."
-          base: ${{ env.DEST_BRANCH }}
-          branch: ${{ env.SYNC_BRANCH }}
+        run: |
+          gh pr create -R ${{ env.DEST_REPO }} \
+            -B ${{ env.DEST_BRANCH }} \
+            -H ${{ env.SYNC_BRANCH }} \
+            --title "Automated Sync PR: new_source → new_destination" \
+            --body "This PR was automatically created by the GitHub Action to sync changes."
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
 
 
         

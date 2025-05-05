@@ -1,4 +1,4 @@
-name: Sync to destination Repository and Create PR
+name: Sync to destination Repository and Create PRs
 
 on:
   push:

@@ -6,7 +6,7 @@ on:
       - new_source
 
 jobs:
-  sync:
+  sync_and_raise_PR:
     runs-on: ubuntu-latest
 
     env:

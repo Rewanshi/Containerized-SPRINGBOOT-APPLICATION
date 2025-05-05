@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Trigger when changes are pushed to 'main' branch
   schedule:
-    - cron: '8 19 * * *'  # Runs at 19:08 UTC daily
+    - cron: '10 19 * * *'  # Runs at 19:10 UTC every day
 
 jobs:
   sync_and_raise_PR:

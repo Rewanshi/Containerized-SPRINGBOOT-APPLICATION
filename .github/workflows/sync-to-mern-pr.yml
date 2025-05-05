@@ -12,10 +12,10 @@ jobs:
     env:
       DEST_REPO: Rewanshi/Containerized-MERN-STACK-TODOAPP
       DEST_BRANCH: new_destination
-      SYNC_BRANCH: sync-from-new_source
+      SYNC_BRANCH: sync-from-new-source
 
     steps:
-      - name: Checkout Source Repo (Repo A)
+      - name: Checkout Source Repo
         uses: actions/checkout@v3
         with:
           ref: new_source
@@ -25,39 +25,33 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Clone Destination Repo (Repo B)
+      - name: Clone Destination Repo
         run: |
           git clone https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ env.DEST_REPO }} dest-repo
           cd dest-repo
           git checkout ${{ env.DEST_BRANCH }}
-
-      - name: Sync Files from Source to Destination
-        run: |
-          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./dest-repo/
-          cd dest-repo
+          # Create or reset the sync branch
           git checkout -B ${{ env.SYNC_BRANCH }}
+          # Sync files (ignore .git and workflow files)
+          rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
           git add .
-          git commit -m "Sync changes from Repo A new_source → Repo B ${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
+          git commit -m "Sync changes from new_source → MERN:${{ env.SYNC_BRANCH }}" || echo "No changes to commit"
           git push -f origin ${{ env.SYNC_BRANCH }}
 
       - name: Install GitHub CLI
-        run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt update
-          sudo apt install gh -y
+        run: sudo apt-get install gh -y
 
-      - name: Authenticate GitHub CLI
-        run: gh auth login --with-token <<< "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
-
-      - name: Create Pull Request using gh CLI
+      - name: Create Pull Request
         run: |
+          gh auth login --with-token <<< "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
           gh pr create \
-            --repo ${{ env.DEST_REPO }} \
-            --base ${{ env.DEST_BRANCH }} \
-            --head ${{ env.SYNC_BRANCH }} \
-            --title "Sync: Repo A new_source → Repo B new_destination" \
-            --body "Automated PR created by GitHub Action to sync changes."
+            -R ${{ env.DEST_REPO }} \
+            -B ${{ env.DEST_BRANCH }} \
+            -H ${{ env.SYNC_BRANCH }} \
+            --title "Sync: new_source → new_destination" \
+            --body "Automated PR created by GitHub Actions to sync changes."
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
 
 

@@ -31,8 +31,8 @@ jobs:
           cd dest-repo
           git checkout ${{ env.DEST_BRANCH }}
 
-          # Pull latest to avoid non-fast-forward errors
-          git pull origin ${{ env.DEST_BRANCH }}
+          # Create or update the SYNC_BRANCH inside Repo B
+          git checkout -B ${{ env.SYNC_BRANCH }}
 
           # Sync files (ignore .git and workflows)
           rsync -av --delete --exclude='.git' --exclude='.github/workflows/**' ../ ./ || true
@@ -55,6 +55,7 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
 
 
 

@@ -43,7 +43,6 @@ jobs:
 
       - name: Create Pull Request
         run: |
-          gh auth login --with-token <<< "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
           gh pr create \
             -R ${{ env.DEST_REPO }} \
             -B ${{ env.DEST_BRANCH }} \
@@ -52,6 +51,7 @@ jobs:
             --body "Automated PR created by GitHub Actions to sync changes."
         env:
           GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
 
 
 

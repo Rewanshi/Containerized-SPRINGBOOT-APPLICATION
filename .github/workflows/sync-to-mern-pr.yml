@@ -1,4 +1,4 @@
-name: Sync to MERN Repo and Create PR
+name: Sync to destination Repo and Create PR 
 
 on:
   push:

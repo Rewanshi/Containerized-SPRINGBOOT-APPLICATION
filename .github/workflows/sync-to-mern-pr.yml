@@ -6,7 +6,7 @@ on:
       - ${{ env.SOURCE_BRANCH }}
   schedule:
     # Runs at midnight on Jan 1, Apr 1, Jul 1, Oct 1
-    - cron: '0 11 1 1,4,7,10 *'
+    - cron:  '0 18 * * *'
 
 env:
   SOURCE_BRANCH: new_source

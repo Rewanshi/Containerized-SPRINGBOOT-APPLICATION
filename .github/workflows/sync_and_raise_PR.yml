@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - ${{ env.SOURCE_BRANCH }}
-  schedule:
-    # Runs at midnight on Jan 1, Apr 1, Jul 1, Oct 1
-    - cron: '30 18 * * *'
+  # schedule:
+  #   # Runs at midnight on Jan 1, Apr 1, Jul 1, Oct 1
+  #   - cron: '30 18 * * *'
 
 env:
   SOURCE_BRANCH: new_source

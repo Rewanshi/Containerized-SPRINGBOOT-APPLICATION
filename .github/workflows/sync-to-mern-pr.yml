@@ -1,11 +1,11 @@
 name: Sync to MERN Repo and Create PR
 
 on:
-  push:
-    branches:
-      - main  # Trigger when changes are pushed to 'main' branch
+  # push:
+  #   branches:
+  #     - main  # Trigger when changes are pushed to 'main' branch
   schedule:
-    - cron: '10 19 * * *'  # Runs at 19:10 UTC every day
+    - cron: '15 19 * * *' # Runs at 19:10 UTC every day
 
 jobs:
   sync_and_raise_PR:
